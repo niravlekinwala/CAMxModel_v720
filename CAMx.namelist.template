@@ -1,0 +1,308 @@
+! NOTE: this namelist provides an example of all possible variables used to
+!       configure CAMx.  It is for illustrative purposes only and is not
+!       configured to run the CAMx test case available from www.camx.com.
+!       Use the test case job script that comes with that dataset.
+
+ &CAMx_Control
+
+ Run_Message      = 'Example CAMx namelist for v7.20',
+ 
+!--- Model clock control ---
+
+ Time_Zone        = 0,                 ! (0=UTC,5=EST,6=CST,7=MST,8=PST)
+ Restart          = .true.,
+ Start_Date_Hour  = 2016,06,10,0000,   ! (YYYY,MM,DD,HHmm)
+ End_Date_Hour    = 2016,06,10,2400,   ! (YYYY,MM,DD,HHmm)
+
+ Maximum_Timestep    = 15.,            ! minutes
+ Met_Input_Frequency = 60.,            ! minutes
+ Ems_Input_Frequency = 60.,            ! minutes
+ Output_Frequency    = 60.,            ! minutes
+
+!--- Map projection parameters ---
+
+ Map_Projection      = 'LAMBERT', ! (LAMBERT,POLAR,RPOLAR,MERCATOR,LATLON,UTM)
+ UTM_Zone            = 0,
+ Longitude_Pole      = -97.,      ! deg (west<0,south<0)
+ Latitude_Pole       = 45.,       ! deg (west<0,south<0)
+ True_Latitude1      = 33.,       ! deg (west<0,south<0)
+ True_Latitude2      = 45.,       ! deg (west<0,south<0, can = True_Latitude1)
+
+!--- Parameters for the master (first) grid ---
+
+ Number_of_Grids      = 3,
+ Master_SW_XCoord     = -792.,         ! km or deg, SW corner of cell(1,1)
+ Master_SW_YCoord     = -1656.,        ! km or deg, SW corner of cell(1,1)
+ Master_Cell_XSize    = 36.,           ! km or deg
+ Master_Cell_YSize    = 36.,           ! km or deg
+ Master_Grid_Columns  = 68,
+ Master_Grid_Rows     = 68,
+ Number_of_Layers     = 16,
+
+!--- Parameters for the second grid ---
+
+ Nest_Meshing_Factor(2) = 3,           ! Cell size relative to master grid
+ Nest_Beg_I_Index(2)    = 22,          ! Relative to master grid
+ Nest_End_I_Index(2)    = 51,          ! Relative to master grid
+ Nest_Beg_J_Index(2)    = 22,          ! Relative to master grid
+ Nest_End_J_Index(2)    = 58,          ! Relative to master grid
+
+!--- Parameters for the third grid ---
+
+ Nest_Meshing_Factor(3) = 9,           ! Cell size relative to master grid
+ Nest_Beg_I_Index(3)    = 35,          ! Relative to master grid
+ Nest_End_I_Index(3)    = 50,          ! Relative to master grid
+ Nest_Beg_J_Index(3)    = 33,          ! Relative to master grid
+ Nest_End_J_Index(3)    = 37,          ! Relative to master grid
+ 
+!--- Model options ---
+
+ Diagnostic_Error_Check = .false.,     ! True = will stop after model setup
+ Flexi_Nest             = .false.,     ! True = expect flexi-nested inputs
+ Advection_Solver       = 'PPM',       ! (PPM,BOTT)
+ Vadvection_Solver      = 'PPM',       ! (PPM,IMPLICIT)
+ Chemistry_Solver       = 'EBI',       ! (EBI,LSODE)
+ PiG_Submodel           = 'None',      ! (None,GREASD,IRON)
+ Probing_Tool           = 'None',      ! (None,SA,DDM,HDDM,PA,IPR,IRR,RTRAC,RTCMC)
+ Chemistry              = .true.,
+ Drydep_Model           = 'ZHANG03',   ! (None,WESELY89,ZHANG03)
+ Bidi_NH3_Drydep        = .true.,
+ Wet_Deposition         = .true.,
+ ACM2_Diffusion         = .false.,
+ Subgrid_Convection     = .false.,
+ Surface_Model          = .false.,
+ Inline_Ix_Emissions    = 'TRUE',      ! (TRUE,FALSE,BYPASS)
+ Strat_Ozone_Profile    = .false.,
+ Super_Stepping         = .true.,
+ Gridded_Emissions      = .true.,
+ Point_Emissions        = .true.,
+ Ignore_Emission_Dates  = .true.,
+  
+!--- Output specifications ---
+
+ Root_Output_Name         = 'CAMx7.test.160610',
+ Average_Output_3D        = .false.,
+ NetCDF_Format_Output     = .false.,
+ NetCDF_Use_Compression   = .false.,
+ Output_3D_Grid(1)        = .false.,   ! Set Average_Output_3D = .false.
+ Output_3D_Grid(2)        = .false.,   ! if you set any of these to .true.
+ Output_3D_Grid(3)        = .false.,
+ Output_Gas_Concs_PPM     = .true.,    ! .true. = PPM,  .false. = ug/m^3
+ Output_Species_Names(1)  = 'NO  ',    ! "ALL" writes all state species
+ Output_Species_Names(2)  = 'NO2 ',    ! "ALLR" writes all state + radical species
+ Output_Species_Names(3)  = 'O3  ',
+ Output_Species_Names(4)  = 'PAR ',
+ Output_Species_Names(5)  = 'TOL ',
+ Output_Species_Names(6)  = 'ETH ',
+ Output_Species_Names(7)  = 'OLE ',
+ Output_Species_Names(8)  = 'PAN ',
+ Output_Species_Names(9)  = 'ISOP',
+ Output_Species_Names(10) = 'XYL ',
+ Output_Species_Names(11) = 'FORM',
+ Output_Species_Names(12) = 'ALD2',
+ Output_Species_Names(13) = 'HNO3',
+ Output_Species_Names(14) = 'NXOY',
+ Output_Species_Names(15) = 'NTR ',
+
+ PiG_Sampling_Grid        = .true.,
+ Sample_Background        = .true.,        ! Ignore if PiG = None
+ Number_of_Sampling_Grids = 1,             ! Ignore if PiG = None
+ SG_Beg_I_Index(1)        = 17,            ! Relative to master grid
+ SG_End_I_Index(1)        = 18,
+ SG_Beg_J_Index(1)        = 21,
+ SG_End_J_Index(1)        = 22,
+ SG_Mesh_Factor(1)        = 36.,           ! Cell size relative to master grid
+
+!--- Input files ---
+
+ Chemistry_Parameters = 'CAMx7.2.chemparam.CB6r5_CF2E',
+ Photolysis_Rates     = 'tuv.do_CB6r5.160610',
+ Ozone_Column         = 'o3map.160610.dat',
+ Initial_Conditions   = 'ic.generic.bin',
+ Boundary_Conditions  = 'bc.generic.bin',
+ Top_Concentrations   = ' ',
+ Point_Sources(1)     = 'pt.160610.bin',
+ Master_Grid_Restart  = 'CAMx7.test.160610.inst',
+ Nested_Grid_Restart  = 'CAMx7.test.160610.finst',
+ PiG_Restart          = 'CAMx7.test.160610.pig',
+ Srfmod_Grid(1)       = ' ',
+ Srfmod_Grid(2)       = ' ',
+ Srfmod_Grid(3)       = ' ',
+
+ Surface_Grid(1) = 'surface.grid1.bin',
+ Surface_Grid(2) = 'surface.grid2.bin',
+ Surface_Grid(3) = 'surface.grid3.bin',
+ Met3D_Grid(1)   = 'met3d.160610.36km',
+ Met3D_Grid(2)   = 'met3d.160610.12km',
+ Met3D_Grid(3)   = 'met3d.160610.04km',
+ Met2D_Grid(1)   = 'met2d.160610.36km',
+ Met2D_Grid(2)   = 'met2d.160610.12km',
+ Met2D_Grid(3)   = 'met2d.160610.04km',
+ Vdiff_Grid(1)   = 'vdiff.160610.36km',
+ Vdiff_Grid(2)   = 'vdiff.160610.12km',
+ Vdiff_Grid(3)   = 'vdiff.160610.04km',
+ Cloud_Grid(1)   = 'cloud.160610.36km',
+ Cloud_Grid(2)   = 'cloud.160610.12km',
+ Cloud_Grid(3)   = 'cloud.160610.04km',
+ Emiss_Grid(1,1) = 'emiss.160610.36km',
+ Emiss_Grid(2,1) = 'emiss.160610.12km',
+ Emiss_Grid(3,1) = 'emiss.160610.04km',
+
+ /
+!-------------------------------------------------------------------------------
+ &SA_Control
+
+ SA_File_Root              = 'CAMx7.test.160610',
+ SA_Summary_Output         = .true.,
+
+ SA_Stratify_Boundary         = .true.,
+ SA_Deposition_Output         = .false.,
+ SA_Number_of_Source_Regions  = 10,
+ SA_Number_of_Source_Groups   = 3,
+ Use_Gridded_Leftover_Group   = .false.,
+ SA_Treat_SULFATE_Class       = .false.,
+ SA_Treat_NITRATE_Class       = .true.,
+ SA_Treat_SOA_Class           = .false.,
+ SA_Treat_PRIMARY_Class       = .false.,
+ SA_Treat_MERCURY_Class       = .false.,
+ SA_Treat_OZONE_Class         = .false.,
+ SA_Use_APCA                  = .false.,
+
+ SA_Receptor_Definitions  = 'osat.rcp.def.dat',
+ SA_Source_Area_Map(1)    = 'osat.src.area.map.g1',
+ SA_Source_Area_Map(2)    = 'osat.src.area.map.g2',
+ SA_Source_Area_Map(3)    = 'osat.src.area.map.g3',
+ SA_Use_Partial_SourceMap = .false.,
+ Partial_Source_Area_Map(1,1) = ' ',   ! Map for SA group 1, grid 1
+ Partial_Source_Area_Map(2,1) = ' ',   ! Map for SA group 2, grid 1
+ Partial_Source_Area_Map(3,1) = ' ',   ! Map for SA group 3, grid 1
+ SA_PT_Override           = .false.,
+ SA_3D_Average            = .false.,
+ 
+ SA_Initial_Conditions    = 'CAMx7.test.160610.osat.ic.bin',
+ SA_Boundary_Conditions   = 'CAMx7.test.160610.osat.bc.bin',
+ SA_Top_Concentrations    = 'CAMx7.test.160610.osat.tc.bin',
+ SA_Master_Restart        = 'CAMx7.test.160610.osat.inst',
+ SA_Nested_Restart        = 'CAMx7.test.160610.osat.finst',
+ 
+ SA_Points_Group(1,1)     = 'ptsrc.utils.160610.bin',
+ SA_Points_Group(3,1)     = 'ptsrc.other.160610.bin',
+  
+ SA_Emiss_Group_Grid(1,1,1) = 'emiss.utils_low.160610.36km.bin',
+ SA_Emiss_Group_Grid(1,2,1) = 'emiss.utils_low.160610.12km.bin',
+ SA_Emiss_Group_Grid(1,3,1) = 'emiss.utils_low.160610.04km.bin',
+ SA_Emiss_Group_Grid(2,1,1) = 'emiss.mv.160610.36km.bin',
+ SA_Emiss_Group_Grid(2,2,1) = 'emiss.mv.160610.12km.bin',
+ SA_Emiss_Group_Grid(2,3,1) = 'emiss.mv.160610.04km.bin',
+ SA_Emiss_Group_Grid(3,1,1) = 'emiss.other.160610.36km.bin',
+ SA_Emiss_Group_Grid(3,2,1) = 'emiss.other.160610.12km.bin',
+ SA_Emiss_Group_Grid(3,3,1) = 'emiss.other.160610.04km.bin',
+ 
+ /
+!-------------------------------------------------------------------------------
+ &DDM_Control
+
+ DDM_File_Root                = 'CAMx7.test.160610',
+ DDM_Stratify_Boundary        = .true.,
+ DDM_Number_of_Source_Regions = 10,
+ DDM_Number_of_Source_Groups  = 3,
+
+ Number_of_IC_Species_Groups = 1,
+ IC_Species_Groups(1)        = 'O3',
+ Number_of_BC_Species_Groups = 1,
+ BC_species_Groups(1)        = 'O3',
+ Number_of_EM_Species_Groups = 2,
+ Emis_Species_Groups(1)      = 'NOX',
+ Emis_Species_Groups(2)      = 'VOC',
+ Number_of_Rate_Const_Groups = 1,
+ Rate_Const_Groups(1)        = 'RXN1: 120,121,122',
+ Number_of_Rate_Term_Groups  = 3,
+ Rate_Term_Groups(1,1)       = 'RT01: 45[R]OH',
+ Rate_Term_Groups(2,1)       = 'RT02: 45[R]NO2',
+ Rate_Term_Groups(3,1)       = 'RT03: 45[P]HNO3',
+ Number_of_HDDM_Sens_Groups  = 3,
+ HDDM_Parameters(1,1)        = 'EM0201NOX_', !HDDM parameter #1, 1st-order #1
+ HDDM_Parameters(1,2)        = 'EM0201NOX_', !HDDM parameter #1, 1st-order #2
+ HDDM_Parameters(2,1)        = 'EM0201VOC_', !HDDM parameter #2, 1st-order #1
+ HDDM_Parameters(2,2)        = 'EM0201VOC_', !HDDM parameter #2, 1st-order #2
+ HDDM_Parameters(3,1)        = 'EM0201NOX_', !HDDM parameter #3, 1st-order #1
+ HDDM_Parameters(3,2)        = 'EM0201VOC_', !HDDM parameter #3, 1st-order #2
+
+ DDM_Receptor_Definitions  = 'ddm.rcp.def.dat',
+ DDM_Source_Area_Map(1)    = 'ddm.src.area.map.g1',
+ DDM_Source_Area_Map(2)    = 'ddm.src.area.map.g2',
+ DDM_Source_Area_Map(3)    = 'ddm.src.area.map.g3',
+ DDM_PT_Override           = .false.,
+ DDM_Calc_Grid(1)          = .true.,
+ DDM_Calc_Grid(2)          = .true.,
+ DDM_Calc_Grid(3)          = .true.,
+
+ DDM_Initial_Conditions    = 'ic.generic.bin',
+ DDM_Boundary_Conditions   = 'bc.generic.bin',
+ DDM_Top_Concentrations    = 'tc.generic.bin',
+ DDM_Master_Restart        = 'CAMx7.test.160610.ddm.inst',
+ DDM_Nested_Restart        = 'CAMx7.test.160610.ddm.finst',
+
+ DDM_Points_Group(1,1)     = 'ptsrc.utils.160610.bin',
+ DDM_Points_Group(3,1)     = 'ptsrc.other.160610.bin',
+ 
+ DDM_Emiss_Group_Grid(1,1,1) = 'emiss.utils_low.160610.36km.bin',
+ DDM_Emiss_Group_Grid(1,2,1) = 'emiss.utils_low.160610.36km.bin',
+ DDM_Emiss_Group_Grid(1,3,1) = 'emiss.utils_low.160610.36km.bin',
+ DDM_Emiss_Group_Grid(2,1,1) = 'emiss.mv.160610.36km.bin',
+ DDM_Emiss_Group_Grid(2,2,1) = 'emiss.mv.160610.36km.bin',
+ DDM_Emiss_Group_Grid(2,3,1) = 'emiss.mv.160610.36km.bin',
+ DDM_Emiss_Group_Grid(3,1,1) = 'emiss.other.160610.36km.bin',
+ DDM_Emiss_Group_Grid(3,2,1) = 'emiss.other.160610.36km.bin',
+ DDM_Emiss_Group_Grid(3,3,1) = 'emiss.other.160610.36km.bin',
+
+ /
+!-------------------------------------------------------------------------------
+ &RT_Control
+
+ RT_File_Root            = 'CAMx7.test.160610',
+
+ RT_Initial_Conditions   = ' ',
+ RT_Boundary_Conditions  = ' ',
+ RT_Top_Concentrations   =  ' ',
+ RT_Master_Restart       = 'CAMx7.test.160610.rtrac.inst',
+ RT_Nested_Restart       = 'CAMx7.test.160610.rtrac.finst',
+
+ RT_Chemistry_Parameters = 'CAMx7.2.chemparam.rtrac_test',
+ RT_Receptor_Definitions = 'receptor.rtrac.test',
+ RT_Point_Sources        = 'pt.rtrac.test',
+ RT_Emiss_Grid(1)        = 'emiss.rtrac.36km',
+ RT_Emiss_Grid(2)        = 'emiss.rtrac.12km',
+ RT_Emiss_Grid(3)        = 'emiss.rtrac.04km',
+
+ RT_Partitioning         = .false.,
+ RT_Surface_Model        = .false.,
+ RT_Srfmod_Grid(1)       = ' ',
+ RT_Srfmod_Grid(2)       = ' ',
+ RT_Srfmod_Grid(3)       = ' ',
+ RT_PiG_Sample           = .true.,               ! Ignore if PiG = false
+
+ /
+!-------------------------------------------------------------------------------
+ &PA_Control
+
+ PA_File_Root         = 'CAMx7.test.160610',
+
+ Number_of_PA_Domains = 2,
+ Within_CAMx_Grid(1)  = 1,  ! Specify which CAMx grid that this PA domain is in
+ PA_Beg_I_Index(1)    = 8,
+ PA_End_I_Index(1)    = 12,
+ PA_Beg_J_Index(1)    = 9,
+ PA_End_J_Index(1)    = 13,
+ PA_Beg_K_Index(1)    = 1,
+ PA_End_K_Index(1)    = 5,
+
+ Within_CAMx_Grid(2)  = 3,  ! Specify which CAMx grid that this PA domain is in
+ PA_Beg_I_Index(2)    = 107,
+ PA_End_I_Index(2)    = 110,
+ PA_Beg_J_Index(2)    = 78,
+ PA_End_J_Index(2)    = 82,
+ PA_Beg_K_Index(2)    = 1,
+ PA_End_K_Index(2)    = 7,
+
+ /

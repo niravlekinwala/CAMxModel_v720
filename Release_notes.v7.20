@@ -1,0 +1,242 @@
+RELEASE NOTES for CAMx v7.20, 04/30/22
+
+The Comprehensive Air Quality Model with extensions (CAMx) is available at
+www.camx.com.  
+
+
+Overview of Version 7.20
+------------------------
+
+V7.20 includes new features, modifications, and bug fixes from the previous
+release (v7.10)
+
+* Use the chemistry parameters files specifically labeled for v7.2.
+* Use the TUV photolysis pre-processor specific to v7.2.
+* Check the CAMx control namelist template for the full list of control
+  variables specific to this version.
+* The operation of the CAMx makefile has not changed since the last version.
+  Type "make" or "make help" for more information.
+  NOTE: RECENT VERSIONS OF THE GFORTRAN COMPILER WILL NOT COMPILE CAMx
+        WITH OMP PARALLELIZATION BECAUSE OF AN INCOMPATIBILITY WITH BLOCK
+        DATA IN ISORROPIA. THIS IS NOT AN ISSUE WITH OTHER SUPPORTED COMPILERS.
+        OPTIONS:
+        a) USE MPI ONLY WITH GFORTRAN
+        b) REVERT BACK TO AN OLDER VERSION OF GFORTRAN
+        c) USE A DIFFERENT COMPILER
+
+
+v7.20 New Features and Major Updates
+------------------------------------
+
+1. Announcing the Cloud-in-Grid (CiG) convective mixing model.
+
+   Implications: This feature was implemented in 2015 but not advertised.  CiG
+                 comprises an entraining/detraining plume model that treats
+                 shallow to deep vertical mixing within sub-grid convective
+                 clouds.  This option requires specific meteorological input
+                 variables from the WRF multi-scale Kain-Fritsch (MSKF) cumulus
+                 model.  CiG can result in significant modifications to vertical
+                 pollutant concentration profiles for grid columns containing
+                 convective activity.  CiG does not yet operate with any of the
+                 Probing Tools.  See the CAMx User's Guide for a full
+                 description.
+
+
+2. A Stratospheric Ozone Profile Scheme has been added for hemispheric
+   applications.
+
+   Implications: This is a simple scheme that defines stratospheric ozone
+                 profiles based on independently derived inputs of time- and
+                 space-varying top boundary conditions.  The purpose of this
+                 module is to maintain stratospheric ozone profiles above the
+                 tropopause during long simulations without the need to include
+                 an explicit stratospheric chemistry mechanism.  We recommend
+                 against using the scheme for urban to continental scale
+                 applications.  OSAT has been updated to accommodate the
+                 stratospheric ozone module, but no other Probing Tools are yet
+                 supported.
+
+3. A new PPM solver option has been added for vertical advection.
+
+   Implications: The PPM scheme is an alternative to the original CAMx implicit
+                 backward-Euler hybrid integration scheme.  While both are
+                 designed to limit numerical diffusion, PPM is less numerically
+                 diffusive but as an explicit scheme it requires multiple sub-
+                 steps to ensure a stable solution, whereas the original
+                 implicit scheme is more diffusive but may run somewhat faster.
+                 PPM operates with all Probing Tools.
+
+v7.20 Modifications
+-------------------
+
+1. Removed the Carbon Bond version 2005 (CB05) photochemical mechanism.
+
+   Implications: CB05 is now obsolete and has since been superseded by five
+                 releases of CB6 over the past 10 years.  The next major update
+                 to Carbon Bond will be CB7 expected in the next release.
+
+2. Added new option to output gas concentrations in units of ug/m3, rather than
+   the default ppm units.
+
+   Implications: This option helps certain users who need to compare gas
+                 concentration predictions to measurement data in ug/m3.
+
+
+3. Added the ability to bypass Ix in-line and gridded input emissions for CB6.
+
+   Implications: CB6 has included marine iodine chemistry since CB6r4, where
+                 oceanic Ix emissions are estimated either in-line as CAMx runs
+                 or from input gridded emissions, otherwise the model stops with
+                 an error.  This created a burden for CAMx applications that do
+                 not include oceans in the domain.  The "Inline_Ix_Emissions"
+                 flag has been updated from a T/F logical to a character flag
+                 that allows for "TRUE" (use in-line Ix emissions), "FALSE" (use
+                 input gridded emissions), or "BYPASS" (ignore all Ix emissions).
+                 The BYPASS option still runs Ix chemistry in CB6, but the model
+                 allows for zero Ix emissions.
+
+4. Updated the global average CH4 concentration used for chemistry from 1.75 to
+   1.85 ppm
+
+   Implications: This update reflects current global CH4 levels, which is used
+                 in the photochemical mechanisms.  The model continues to allow
+                 for a separately emitted CH4 (ECH4) species provided by
+                 emission files.  Expect very small effects on ozone
+                 concentrations.
+
+5. Updated surface UV albedo for 2 landuse classifications based on more recent
+   published data.
+
+   Implications: Albedo for water and barren land were increased by a few
+                 percentage points to 7% and 10%, respectively. Expect
+                 small effects on ozone concentrations.
+
+6. Updated SAT to read netCDF initial/boundary condition input files. Also fixed
+   a bug in reading/counting SAT tracer variables on initial/boundary condition
+   files.
+
+   Implications: In prior versions, the SAT initial/boundary condition input
+                 files needed to be in Fortran binary format.  Initial/boundary
+                 condition pre-processors have been updated to generate netCDF
+                 formats.
+
+7. Numerous minor updates in RTRAC/RTCMC to increase flexibility in defining
+   tracer chemistry.
+
+   Implications: Updates include:
+                 a) Factors can be applied to RTCMC photolysis rates that point
+                    to core mechanism reaction rates.
+                 b) RTRAC reads reaction rates in molecular units instead of
+                    ppm units, as the former is more commonly reported.
+                 c) Improved the method to define octanol partitioning
+                    coefficient (Koa) for semi-volatile organic tracers that
+                    may exist as a gas or aerosol.
+
+8. Updated RTRAC/RTCMC to output deposition files like the core model and SAT.
+
+   Implications: RTRAC calculates deposition of gas and PM tracers, but up to
+                 now did not write deposited mass to gridded output files.
+                 However, RTRAC had written surface model mass burdens to output
+                 files if the RTRAC surface model was invoked.  Now, depending
+                 on the RTRAC surface model flag, either tracer deposition (F)
+                 or surface model tracer masses (T) are written to output files.
+
+9. Added additional diagnostics and error messages:
+   1)  Error/stop when SAT/APCA = "TRUE" and less than 2 source groups are
+       specified (biogenics must be specified as group #1, and at least one
+       other group must be specified).
+   2)  Error/stop when no gridded emission are provided but the gridded
+       emissions flag is "TRUE"
+   3)  Removed check on point source region override flag when only 1 SAT
+       region is specified.
+
+   Implications: These additional checks help the user understand issues
+                 with the CAMx run configuration and keeps the model from
+                 crashing or generating spurious results.
+
+
+v7.20 Bug Fixes
+---------------
+
+1. Updated the definition of VAR (dimension), NVARS (global attribute) and
+   VAR-LIST (global attribute) in all netCDF I/O files for consistency.
+   Several other minor netCDF bug fixes, mostly related to global attributes.
+   Added NCF error codes to CAMx error messages related to NCF problems.
+
+   Implications: Now VAR and NVARS consistently define the number of time-
+                 varying variables in all files, which are listed in the
+                 VAR-LIST global attribute.
+
+2. Fix Probing Tool bug that prevented writing of restart files when only 1
+   grid is active.
+
+   Implications: This bug affected the generation of restart files for
+                 several Probing Tools.
+
+3. Fix bug in initializing count of emissions files (RTRAC/startrt.f)
+
+   Implications: RTRAC continues to require a single gridded and point
+                 emission files, and so this count was not used. This
+                 alleviates a runtime error on initialization.  RTRAC
+                 emission file variables in the CAMx control namelist file
+                 are not indexed by emission sector.
+
+4. Fix bug initializing point source data structures when point sources
+   were not supplied. 
+
+   Implications: When running without point source inputs with SAT
+                 invoked, datasets were accessed that were not initialized,
+                 causing a runtime error.
+
+5. Fix bug writing topographic fields to Probing Tool output files.
+
+   Implications: Previously topographic fields were defined but not written.
+
+6. Fix minor mathematical error in the UTM<->geodetic conversion subroutine.
+
+   Implications: The math error is reported to have resulted in up to 7 meter
+                 differences in UTM coordinates.
+
+7. Fix the calculation of wet deposition liquid water concentration output
+   fields.
+
+   Implication: Values of liquid concentration written to gridded deposition
+                files were too low because of two numerical errors related
+                to time-averaging rather than time-accumulating.
+
+8. Revised the naming convention for output deposition variables.
+
+   Implications: This was done to maximize species string length and to be
+                 consistent with deposition variable names generated by the
+                 Probing Tools.
+                 Now the naming is: R_species (dry deposition velocity)
+                                    D_species (dry deposition)
+                                    W_species (wet deposition)
+                                    L_species (liquid concentration)
+
+10. Fixed bug looking for incorrect NCF file type for initial concentration in
+    DDM input files.
+
+    Implications: This bug led to CAMx initialization failure when checking the
+                  file type.
+
+11. Fix bug in SAT timestamp when crossing over the new year.
+
+    Implications: Alleviates run-time error in crossing new year.
+
+12. Fix various bugs in reading NCF DDM/RTRAC point source file headers.
+
+    Implications: Alleviates startup crashes when reading these files.
+
+13. Ensure true latitudes for Lambert projection parameters are written to
+    model output files in the correct order.
+
+    Implications: Incorrect order caused certain Models3/IOAPI post-processing
+                  programs to fail.
+
+14. Fixed bug that was prohibiting VBS emission species from being injected
+    into the grid system.
+
+    Implications: This bug was introduced in v7.0 with the expansion to use
+                  multiple input emission files.  VBS will now generate
+                  OA concentrations. 
